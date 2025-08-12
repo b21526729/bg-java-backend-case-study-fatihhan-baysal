@@ -1,6 +1,7 @@
 package com.example.bilisimgarajitask.common;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*; import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import jakarta.validation.ConstraintViolationException;
@@ -23,4 +24,12 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiError> build(HttpStatus s, String msg, String path){
         return ResponseEntity.status(s).body(new ApiError(s.value(), s.getReasonPhrase(), msg, path, Instant.now()));
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex,
+                                                        HttpServletRequest req) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+    }
+
+
 }
