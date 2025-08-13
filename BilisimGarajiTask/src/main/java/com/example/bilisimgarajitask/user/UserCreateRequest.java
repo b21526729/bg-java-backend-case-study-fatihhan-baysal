@@ -9,10 +9,10 @@ import java.util.UUID;
 
 public record UserCreateRequest(
         @Email @NotBlank String email,
-        @NotBlank @Size(min = 6, max = 120) String password,
+        @NotBlank @Size(min = 1, max = 120) String password,
         @NotBlank @Size(max = 80) String firstName,
         @NotBlank @Size(max = 80) String lastName,
-        @NotNull Role role,
+        @NotNull Integer profileId,
         UUID organizationId,
         UUID classroomId,
         Boolean active

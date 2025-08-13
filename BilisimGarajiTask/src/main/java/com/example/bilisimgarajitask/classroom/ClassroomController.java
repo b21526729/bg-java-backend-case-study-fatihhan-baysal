@@ -1,17 +1,21 @@
 package com.example.bilisimgarajitask.classroom;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 
 @RestController
 @RequestMapping("/api/v1/classrooms")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class ClassroomController {
 
     private final ClassroomService service;

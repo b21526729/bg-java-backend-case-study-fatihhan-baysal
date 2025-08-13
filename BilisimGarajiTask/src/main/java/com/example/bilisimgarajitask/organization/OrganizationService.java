@@ -2,34 +2,44 @@ package com.example.bilisimgarajitask.organization;
 
 import com.example.bilisimgarajitask.brand.Brand;
 import com.example.bilisimgarajitask.brand.BrandRepository;
+import com.example.bilisimgarajitask.classroom.ClassroomRepository;
 import com.example.bilisimgarajitask.common.NotFoundException;
+import com.example.bilisimgarajitask.user.Role;
+import com.example.bilisimgarajitask.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrganizationService {
 
-    private final OrganizationRepository organizationRepository;
-    private final BrandRepository brandRepository;
+    private final OrganizationRepository repoOrg;
+    private final BrandRepository repoBrand;
+
+    private final ClassroomRepository repoClass;
+
+    private final UserRepository repoUser;
 
     private static final String PREFIX = "ORG-";
     private static final String ALPHANUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private final Random rnd = new Random();
 
     public OrganizationResponse create(OrganizationCreateRequest req) {
-        Brand brand = brandRepository.findById(req.brandId())
+        Brand brand = repoBrand.findById(req.brandId())
                 .orElseThrow(() -> new NotFoundException("Brand not found: " + req.brandId()));
 
-        if (organizationRepository.existsByBrandIdAndNameIgnoreCase(brand.getId(), req.name())) {
+        if (repoOrg.existsByBrandIdAndNameIgnoreCase(brand.getId(), req.name())) {
             throw new DataIntegrityViolationException("Organization name already exists under this brand");
         }
 
@@ -40,31 +50,31 @@ public class OrganizationService {
         o.setActive(req.active() == null || req.active());
         o.setCode(generateUniqueCode(brand.getId()));
 
-        Organization saved = organizationRepository.save(o);
+        Organization saved = repoOrg.save(o);
         return OrganizationMapper.toResponse(saved);
     }
 
     public OrganizationResponse get(UUID id) {
-        Organization o = organizationRepository.findById(id)
+        Organization o = repoOrg.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found: " + id));
         return OrganizationMapper.toResponse(o);
     }
 
     public List<OrganizationResponse> list(UUID brandId) {
         if (brandId != null) {
-            return organizationRepository.findAllByBrandId(brandId, Sort.by(Sort.Direction.ASC, "name"))
+            return repoOrg.findAllByBrandId(brandId, Sort.by(Sort.Direction.ASC, "name"))
                     .stream().map(OrganizationMapper::toResponse).toList();
         }
-        return organizationRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+        return repoOrg.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
                 .stream().map(OrganizationMapper::toResponse).toList();
     }
 
     public OrganizationResponse update(UUID id, OrganizationUpdateRequest req) {
-        Organization o = organizationRepository.findById(id)
+        Organization o = repoOrg.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found: " + id));
 
         if (!o.getName().equalsIgnoreCase(req.name())
-                && organizationRepository.existsByBrandIdAndNameIgnoreCase(o.getBrand().getId(), req.name())) {
+                && repoOrg.existsByBrandIdAndNameIgnoreCase(o.getBrand().getId(), req.name())) {
             throw new DataIntegrityViolationException("Organization name already exists under this brand");
         }
 
@@ -73,10 +83,20 @@ public class OrganizationService {
     }
 
     public void delete(UUID id) {
-        Organization o = organizationRepository.findById(id)
+        Organization o = repoOrg.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found: " + id));
-        organizationRepository.delete(o);
+
+        long classCount = repoClass.countByOrganizationId(o.getId());
+        if (classCount > 0) {
+            throw new ResponseStatusException(BAD_REQUEST,"Organization has classrooms; delete them first");
+        }
+        long studentCount = repoUser.countByOrganizationIdAndRole(o.getId(), Role.STUDENT);
+        if (studentCount > 0) {
+            throw new ResponseStatusException(BAD_REQUEST,"Organization has students; delete them first");
+        }
+        repoOrg.delete(o);
     }
+
 
     private String generateUniqueCode(UUID brandId) {
         String code;
@@ -87,7 +107,7 @@ public class OrganizationService {
             if (tries > 10) {
                 code = PREFIX + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
             }
-        } while (organizationRepository.existsByBrandIdAndCodeIgnoreCase(brandId, code));
+        } while (repoOrg.existsByBrandIdAndCodeIgnoreCase(brandId, code));
         return code;
     }
 

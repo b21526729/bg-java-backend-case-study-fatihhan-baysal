@@ -1,5 +1,6 @@
 package com.example.bilisimgarajitask.course;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 @RestController
 @RequestMapping("/api/v1/courses")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class CourseController {
 
     private final CourseService service;

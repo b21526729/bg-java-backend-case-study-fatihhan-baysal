@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
-      - "5432:5432"   # dışarıdan erişmek istersen
+      - "5433:5432"   # dışarıdan erişmek istersen
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,7 +35,7 @@ services:
       DB_PASSWORD: 1234
 
       # JWT'yi prod'da gizli ENV ile değiştir:
-      JWT_SECRET: supersecretkey_1234567890
+      JWT_SECRET: 1f4a7b9c2d3e4f60718293a4b5c6d7e81f4a7b9c2d3e4f60718293a4b5c6d7e8
 
       # (opsiyonel) JVM ayarları
       JAVA_OPTS: "-Xms256m -Xmx512m"

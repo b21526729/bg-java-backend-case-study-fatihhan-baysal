@@ -10,4 +10,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
     boolean existsByBrandIdAndNameIgnoreCase(UUID brandId, String name);
     boolean existsByBrandIdAndCodeIgnoreCase(UUID brandId, String code);
     List<Organization> findAllByBrandId(UUID brandId, Sort sort);
+
+    long countByBrandId(UUID brandId);
+
 }

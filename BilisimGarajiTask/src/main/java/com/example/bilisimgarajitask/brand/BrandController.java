@@ -1,14 +1,18 @@
 package com.example.bilisimgarajitask.brand;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI; import java.util.*;
 
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 @RestController
 @RequestMapping("/api/v1/brands")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class BrandController {
     private final BrandService service;
 

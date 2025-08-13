@@ -1,5 +1,6 @@
 package com.example.bilisimgarajitask.organization;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/organizations")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class OrganizationController {
 
     private final OrganizationService service;

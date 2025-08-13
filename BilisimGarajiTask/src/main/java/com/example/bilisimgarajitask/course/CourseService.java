@@ -1,7 +1,9 @@
 package com.example.bilisimgarajitask.course;
 
+import com.example.bilisimgarajitask.classroomcourse.ClassroomCourseRepository;
 import com.example.bilisimgarajitask.common.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,8 @@ import java.util.UUID;
 @Transactional
 public class CourseService {
 
-    private final CourseRepository courseRepository;
+    private final CourseRepository repoCourse;
+    private final ClassroomCourseRepository repoClassCourse;
 
     private static final String PREFIX = "CRS-";
     private static final String ALPHANUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -27,12 +30,12 @@ public class CourseService {
         c.setDescription(req.description());
         c.setActive(req.active() == null || req.active());
         c.setCode(generateUniqueCode());
-        Course saved = courseRepository.save(c);
+        Course saved = repoCourse.save(c);
         return CourseMapper.toResponse(saved);
     }
 
     public CourseResponse get(UUID id) {
-        Course c = courseRepository.findById(id)
+        Course c = repoCourse.findById(id)
                 .orElseThrow(() -> new NotFoundException("Course not found: " + id));
         return CourseMapper.toResponse(c);
     }
@@ -40,25 +43,29 @@ public class CourseService {
     public List<CourseResponse> list(Boolean active) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         if (active != null) {
-            return courseRepository.findAllByActive(active, sort)
+            return repoCourse.findAllByActive(active, sort)
                     .stream().map(CourseMapper::toResponse).toList();
         }
-        return courseRepository.findAll(sort).stream().map(CourseMapper::toResponse).toList();
+        return repoCourse.findAll(sort).stream().map(CourseMapper::toResponse).toList();
     }
 
     public CourseResponse update(UUID id, CourseUpdateRequest req) {
-        Course c = courseRepository.findById(id)
+        Course c = repoCourse.findById(id)
                 .orElseThrow(() -> new NotFoundException("Course not found: " + id));
         CourseMapper.applyUpdate(c, req);
         return CourseMapper.toResponse(c);
     }
 
     public void delete(UUID id) {
-        Course c = courseRepository.findById(id)
+        Course c = repoCourse.findById(id)
                 .orElseThrow(() -> new NotFoundException("Course not found: " + id));
-        // TODO: ClassroomCourse atamaları varsa engelle (ileride kontrol eklenecek)
-        courseRepository.delete(c);
+
+        long used = repoClassCourse.countByCourseId(c.getId());
+        if (used > 0) throw new DataIntegrityViolationException("Course is assigned to classrooms");
+
+        repoCourse.delete(c);
     }
+
 
     private String generateUniqueCode() {
         String code;
@@ -69,7 +76,7 @@ public class CourseService {
             if (tries > 10) {
                 code = PREFIX + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
             }
-        } while (courseRepository.existsByCodeIgnoreCase(code));
+        } while (repoCourse.existsByCodeIgnoreCase(code));
         return code;
     }
 

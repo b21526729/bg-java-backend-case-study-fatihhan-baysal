@@ -9,4 +9,7 @@ import java.util.UUID;
 public interface ClassroomRepository extends JpaRepository<Classroom, UUID> {
     boolean existsByOrganizationIdAndNameIgnoreCase(UUID organizationId, String name);
     List<Classroom> findAllByOrganizationId(UUID organizationId, Sort sort);
+
+    long countByOrganizationId(UUID organizationId);
+
 }
