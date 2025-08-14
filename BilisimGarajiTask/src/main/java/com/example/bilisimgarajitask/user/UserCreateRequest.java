@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record UserCreateRequest(
         @Email @NotBlank String email,
-        @NotBlank @Size(min = 1, max = 120) String password,
+        @NotBlank @Size(min = 4, max = 120) String password,
         @NotBlank @Size(max = 80) String firstName,
         @NotBlank @Size(max = 80) String lastName,
         @NotNull Integer profileId,

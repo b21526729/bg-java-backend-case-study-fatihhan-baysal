@@ -7,6 +7,7 @@ import com.example.bilisimgarajitask.user.Role;
 import com.example.bilisimgarajitask.user.User;
 import com.example.bilisimgarajitask.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class StudentReadService {
         }
         return listMyCoursesByStudentId(student.getId());
     }
-
+    @Cacheable(cacheNames = "std:myCourses", key = "#studentId")
     public List<StudentMyCourseResponse> listMyCoursesByStudentId(UUID studentId){
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + studentId));

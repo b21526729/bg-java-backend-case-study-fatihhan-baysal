@@ -8,13 +8,13 @@ Testler Swagger UI üzerinden yapılabilir.
 Tüm ID’ler UUID olmalıdır.   
 Kurulum  
 1- Paketle  
-mvn -DskipTests clean package  
+mvn -DskipTests clean package  (docker içerisinde)
 2- Docker ile ayağa kaldır  
 docker compose up -d --build  
 3- Swagger UI  
 URL: http://localhost:8080/swagger-ui.html (API docs: /api-docs).
 
-Proje Docker ortamında çalışmalı ve Swagger’dan test edilebilmelidir. 
+Proje Docker ortamında çalışır ve Swagger’dan test edilebilir. 
 
 4- DB’ye GUI ile bağlanmak  
 
@@ -33,6 +33,8 @@ Body (JSON):
 "firstName": "Super",
 "lastName": "Admin"
 }
+
+password minimum 4 karakterle sınırlandırıldı.
 
 Senaryo: Sistem boş başlar; ilk kullanıcı userRegister ile oluşturulur. (SuperAdmin)
 

@@ -7,6 +7,7 @@ import com.example.bilisimgarajitask.organization.Organization;
 import com.example.bilisimgarajitask.organization.OrganizationRepository;
 import com.example.bilisimgarajitask.teacher.TeacherClassroomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -96,7 +97,7 @@ public class UserService {
         return repoUser.findAll(sort).stream()
                 .map(UserMapper::toResponse).toList();
     }
-
+    @CacheEvict(cacheNames = "std:myCourses", key = "#id")
     public UserResponse update(UUID id, UserUpdateRequest req){
         User u = repoUser.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
@@ -107,7 +108,7 @@ public class UserService {
         }
         return UserMapper.toResponse(u);
     }
-
+    @CacheEvict(cacheNames = "std:myCourses", key = "#id")
     public void delete(UUID id){
         User u = repoUser.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));

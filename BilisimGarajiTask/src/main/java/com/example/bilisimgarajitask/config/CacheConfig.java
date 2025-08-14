@@ -31,7 +31,8 @@ public class CacheConfig {
                 .withInitialCacheConfigurations(Map.of(
                         "brand:byId",      defaults.entryTtl(Duration.ofMinutes(10)),
                         "org:listByBrand", defaults.entryTtl(Duration.ofMinutes(5)),
-                        "cls:listByOrg",   defaults.entryTtl(Duration.ofMinutes(5))
+                        "cls:listByOrg",   defaults.entryTtl(Duration.ofMinutes(5)),
+                        "std:myCourses",   defaults.entryTtl(Duration.ofMinutes(5))
                 ))
                 .build();
     }

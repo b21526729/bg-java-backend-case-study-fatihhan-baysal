@@ -24,7 +24,8 @@ public class BrandService {
 
     public BrandResponse create(BrandCreateRequest r){
         Brand b=new Brand();
-        b.setName(r.name()); b.setDescription(r.description());
+        b.setName(r.name());
+        b.setDescription(r.description());
         b.setActive(r.active()==null || r.active());
         b.setCode(generateUniqueCode());
         return BrandMapper.toResponse(repoBrand.save(b));
