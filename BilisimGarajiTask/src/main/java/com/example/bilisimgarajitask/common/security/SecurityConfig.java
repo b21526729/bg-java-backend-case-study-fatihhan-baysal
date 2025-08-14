@@ -27,15 +27,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger & docs
                         .requestMatchers(
                                 "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/api-docs/**"
                         ).permitAll()
-                        // Auth endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        // (geçici) my-* testleri auth istemeyebilir; JWT’yi aktif ettiğinde kaldır
-                        //.requestMatchers("/api/v1/teachers/**", "/api/v1/students/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwt), UsernamePasswordAuthenticationFilter.class);

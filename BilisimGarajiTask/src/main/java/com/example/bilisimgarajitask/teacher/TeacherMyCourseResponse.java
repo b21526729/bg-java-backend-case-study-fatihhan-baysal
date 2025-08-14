@@ -10,5 +10,5 @@ public record TeacherMyCourseResponse(
         UUID courseId,
         String courseName,
         String courseCode,
-        boolean active // assignment aktifliği
+        boolean active
 ) {}

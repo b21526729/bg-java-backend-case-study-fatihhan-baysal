@@ -12,7 +12,6 @@ public interface ClassroomCourseRepository extends JpaRepository<ClassroomCourse
     List<ClassroomCourse> findAllByClassroomId(UUID classroomId, Sort sort);
     List<ClassroomCourse> findAllByCourseId(UUID courseId, Sort sort);
 
-    // ⇩ EKLENDİ: Öğretmenin birden fazla sınıfı için toplu çekim
     List<ClassroomCourse> findAllByClassroomIdIn(Collection<UUID> classroomIds, Sort sort);
 
     long countByClassroomId(UUID classroomId);

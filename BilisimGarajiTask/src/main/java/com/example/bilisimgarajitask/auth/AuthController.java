@@ -30,7 +30,6 @@ public class AuthController {
                 .orElseThrow(() -> new NotFoundException("User not found: " + req.email()));
 
         if (!user.isActive() || !encoder.matches(req.password(), user.getPassword())) {
-            // Güvenlik gereği aynı mesaj
             return ResponseEntity.status(401).build();
         }
 
@@ -38,8 +37,6 @@ public class AuthController {
         String refresh = jwt.generateRefreshToken(user);
         return ResponseEntity.ok(new AuthResponse(
                 access,
-                // props’lardan geliyor; döndürmek için service’e getter eklemek istemedik,
-                // süreleri client zaten bilmek zorunda değil. İstersen 0 bırakabilirsin.
                 0L,
                 refresh,
                 0L,
@@ -62,7 +59,6 @@ public class AuthController {
         }
 
         String access = jwt.generateAccessToken(user);
-        // İstersen her refresh’te yeni refresh da üret:
         String refresh = jwt.generateRefreshToken(user);
 
         return ResponseEntity.ok(new AuthResponse(access, 0L, refresh, 0L, "Bearer"));
@@ -99,7 +95,6 @@ public class AuthController {
         }
 
 
-        // Email çakışmasına karşı (teoride count==0 iken gereksiz ama güvenli)
         if (userRepo.existsByEmailIgnoreCase(req.email())) {
             throw new DataIntegrityViolationException("Email already in use");
         }

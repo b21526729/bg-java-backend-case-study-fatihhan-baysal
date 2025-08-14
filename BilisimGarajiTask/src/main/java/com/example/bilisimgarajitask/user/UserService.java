@@ -116,7 +116,7 @@ public class UserService {
             long assigns = repoTeacherClass.countByTeacherId(u.getId());
             if (assigns > 0) throw new ResponseStatusException(BAD_REQUEST,"Teacher has classroom assignments");
         }
-        // STUDENT silerken özel kural istiyorsan burada kontrol edebilirsin (örn. notlar vs.)
+
         repoUser.delete(u);
     }
 

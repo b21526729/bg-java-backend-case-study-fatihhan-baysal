@@ -25,6 +25,6 @@ final class UserMapper {
         if (r.firstName() != null) u.setFirstName(r.firstName());
         if (r.lastName()  != null) u.setLastName(r.lastName());
         if (r.active()    != null) u.setActive(r.active());
-        // password set’ini service’te yapıyoruz (encode gerektiriyor)
+
     }
 }

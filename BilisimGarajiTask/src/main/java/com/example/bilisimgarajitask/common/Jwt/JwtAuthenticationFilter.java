@@ -42,7 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String email = c.getSubject();
             String role = String.valueOf(c.get("role"));
-            // ROLE_ prefix’i veriyoruz ki @PreAuthorize("hasRole('TEACHER')") çalışsın
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
             var authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);

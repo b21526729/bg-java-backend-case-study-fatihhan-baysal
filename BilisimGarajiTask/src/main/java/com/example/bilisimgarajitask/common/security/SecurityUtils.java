@@ -13,7 +13,6 @@ public final class SecurityUtils {
         if (auth == null || !auth.isAuthenticated()) return Optional.empty();
         Object principal = auth.getPrincipal();
         if (principal == null) return Optional.empty();
-        // auth.getName() = username/email
         String name = auth.getName();
         if (name == null || name.isBlank() || "anonymousUser".equalsIgnoreCase(String.valueOf(principal))) {
             return Optional.empty();

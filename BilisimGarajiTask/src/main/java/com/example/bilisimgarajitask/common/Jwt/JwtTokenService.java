@@ -26,7 +26,6 @@ public class JwtTokenService {
     private long refreshExpirationMs;
 
     private Key key() {
-        // secret >= 32 chars olmalı (HS256 için 256-bit)
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 

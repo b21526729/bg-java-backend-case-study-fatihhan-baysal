@@ -7,6 +7,9 @@ import com.example.bilisimgarajitask.common.NotFoundException;
 import com.example.bilisimgarajitask.user.Role;
 import com.example.bilisimgarajitask.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,9 @@ public class OrganizationService {
     private static final String PREFIX = "ORG-";
     private static final String ALPHANUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private final Random rnd = new Random();
+    private final CacheManager cacheManager;
 
+    @CacheEvict(cacheNames = "org:listByBrand", key = "#req.brandId()")
     public OrganizationResponse create(OrganizationCreateRequest req) {
         Brand brand = repoBrand.findById(req.brandId())
                 .orElseThrow(() -> new NotFoundException("Brand not found: " + req.brandId()));
@@ -60,6 +65,7 @@ public class OrganizationService {
         return OrganizationMapper.toResponse(o);
     }
 
+    @Cacheable(cacheNames = "org:listByBrand", key = "#brandId", condition = "#brandId != null")
     public List<OrganizationResponse> list(UUID brandId) {
         if (brandId != null) {
             return repoOrg.findAllByBrandId(brandId, Sort.by(Sort.Direction.ASC, "name"))
@@ -68,10 +74,10 @@ public class OrganizationService {
         return repoOrg.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
                 .stream().map(OrganizationMapper::toResponse).toList();
     }
-
     public OrganizationResponse update(UUID id, OrganizationUpdateRequest req) {
         Organization o = repoOrg.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found: " + id));
+        UUID oldBrandId = o.getBrand().getId();
 
         if (!o.getName().equalsIgnoreCase(req.name())
                 && repoOrg.existsByBrandIdAndNameIgnoreCase(o.getBrand().getId(), req.name())) {
@@ -79,9 +85,15 @@ public class OrganizationService {
         }
 
         OrganizationMapper.applyUpdate(o, req);
+        var cache = cacheManager.getCache("org:listByBrand");
+        if (cache != null) {
+            cache.evict(oldBrandId);
+            cache.evict(o.getBrand().getId());
+        }
+
         return OrganizationMapper.toResponse(o);
     }
-
+    @CacheEvict(cacheNames = "org:listByBrand", key = "#o.getBrand().getId()")
     public void delete(UUID id) {
         Organization o = repoOrg.findById(id)
                 .orElseThrow(() -> new NotFoundException("Organization not found: " + id));
@@ -94,7 +106,13 @@ public class OrganizationService {
         if (studentCount > 0) {
             throw new ResponseStatusException(BAD_REQUEST,"Organization has students; delete them first");
         }
+        UUID brandId = o.getBrand().getId();
         repoOrg.delete(o);
+
+        var cache = cacheManager.getCache("org:listByBrand");
+        if (cache != null) {
+            cache.evict(brandId);
+        }
     }
 
 

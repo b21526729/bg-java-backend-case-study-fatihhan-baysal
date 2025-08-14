@@ -64,7 +64,6 @@ public class TeacherReadService {
     }
 
     public List<TeacherMyStudentResponse> listMyStudentsByTeacherId(UUID teacherId){
-        // Öğretmenin atandığı sınıflar
         var sortAssign = Sort.by(Sort.Direction.DESC, "createdAt");
         List<Classroom> classrooms = tcRepo.findAllByTeacherId(teacherId, sortAssign).stream()
                 .map(TeacherClassroom::getClassroom)
@@ -75,7 +74,6 @@ public class TeacherReadService {
 
         List<UUID> classroomIds = classrooms.stream().map(Classroom::getId).toList();
 
-        // Bu sınıflardaki öğrenciler
         var sortStudents = Sort.by(Sort.Direction.ASC, "firstName")
                 .and(Sort.by(Sort.Direction.ASC, "lastName"));
         return userRepo.findAllByRoleAndClassroomIdIn(Role.STUDENT, classroomIds, sortStudents).stream()
@@ -104,7 +102,7 @@ public class TeacherReadService {
     }
 
     public List<TeacherMyCourseResponse> listMyCoursesByTeacherId(UUID teacherId){
-        // Öğretmenin atandığı sınıfları topla
+
         var sortAssign = Sort.by(Sort.Direction.DESC, "createdAt");
         List<Classroom> classrooms = tcRepo.findAllByTeacherId(teacherId, sortAssign).stream()
                 .map(TeacherClassroom::getClassroom)
@@ -114,7 +112,6 @@ public class TeacherReadService {
 
         List<UUID> clsIds = classrooms.stream().map(Classroom::getId).toList();
 
-        // Bu sınıflara atanmış dersleri çek
         var sortCc = Sort.by(Sort.Direction.ASC, "classroom.name")
                 .and(Sort.by(Sort.Direction.ASC, "course.name"));
         return classroomCourseRepo.findAllByClassroomIdIn(clsIds, sortCc).stream()
